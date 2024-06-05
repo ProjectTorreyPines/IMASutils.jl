@@ -1,5 +1,7 @@
 module FuseUtils
 
-# Write your package code here.
+include("basic.jl")
+
+export trapz
 
 end
