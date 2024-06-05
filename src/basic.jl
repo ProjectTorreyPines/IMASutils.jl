@@ -12,3 +12,18 @@ function trapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Re
     end
     return 0.5 * t
 end
+
+function cumtrapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
+    N = length(x)
+    @assert N>=2
+    @assert length(y) == N
+    retarr = Vector{promote_type(S, T)}(undef, N)
+    @inbounds begin
+        retarr[1] = 0.0
+        for k in eachindex(x)[2:end]
+            retarr[k] += retarr[k-1] + (y[k] + y[k-1]) * (x[k] - x[k-1])
+        end
+        retarr .*= 0.5
+    end
+    return retarr
+end

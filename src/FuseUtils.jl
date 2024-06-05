@@ -1,7 +1,6 @@
 module FuseUtils
 
 include("basic.jl")
-
-export trapz
+export trapz, cumtrapz
 
 end
