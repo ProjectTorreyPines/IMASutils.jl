@@ -1,3 +1,8 @@
+"""
+    trapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
+
+Numerically integrates the values in `y` with respect to `x` using the trapezoidal rule.
+"""
 function trapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
     N = length(x)
     @assert N>=2
@@ -13,6 +18,11 @@ function trapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Re
     return 0.5 * t
 end
 
+"""
+    cumtrapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
+
+Computes the cumulative integral of the values in `y` with respect to `x` using the trapezoidal rule.
+"""
 function cumtrapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
     N = length(x)
     @assert N>=2
