@@ -1,7 +1,6 @@
 module FuseUtils
 
-include("basic.jl")
-
+include("integration.jl")
 export trapz, cumtrapz
 
 const document = Dict()
