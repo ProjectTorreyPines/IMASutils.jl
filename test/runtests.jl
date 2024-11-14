@@ -1,4 +1,4 @@
-using FuseUtils
+using IMASutils
 using Test
 
 @testset "integration" begin

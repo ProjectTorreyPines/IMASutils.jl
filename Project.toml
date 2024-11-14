@@ -1,5 +1,5 @@
-name = "FuseUtils"
-uuid = "c8e4ee58-0bec-4a6a-b552-9dd24d6374ac"
+name = "IMASutils"
+uuid = "b8e4ee59-9bed-3a6a-a553-8dd24d6374ad"
 authors = ["Brendan Lyons <lyonsbc@fusion.gat.com> and contributors"]
 version = "1.1.2"
 

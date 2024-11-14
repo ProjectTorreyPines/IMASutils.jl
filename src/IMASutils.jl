@@ -1,4 +1,4 @@
-module FuseUtils
+module IMASutils
 
 include("integration.jl")
 export trapz, cumtrapz
