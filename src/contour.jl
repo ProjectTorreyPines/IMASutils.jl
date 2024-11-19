@@ -131,10 +131,13 @@ end
     contour_cache(values::Matrix{T}; aggression_level::Int = 2) where {T<:Real}
 
 For a given matrix `values`, create cache for x_contour and y_contour
-`aggression_level` determines how large to make the cache
-  1: assume contour no bigger than an inscribed ellipse
-  2: assume contour no bigger than the other boundary
-  3: assume contour could go through every single cell once
+`aggression_level` determines how large to make the cache:
+
+1. assume contour no bigger than an inscribed ellipse
+
+2. assume contour no bigger than the other boundary
+
+3. assume contour could go through every single cell once
 """
 function contour_cache(values::Matrix{T}; aggression_level::Int = 2) where {T<:Real}
     @assert aggression_level in (1, 2, 3)
@@ -158,10 +161,10 @@ end
                           y_coords::AbstractVector{T},
                           level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
 
-Find a contour of (x_coords, y_coords, values) at value=level
-    that crosses y=yaxis at the smallest x > xaxis
-This will correspond to a closed surface around the axis if it exists,
-    otherwise it will give upto one of possibly multiple open surfaces
+Find a contour of (x_coords, y_coords, values) at value=level that crosses y=yaxis at the smallest x > xaxis
+
+This will correspond to a closed surface around the axis if it exists, otherwise it will give upto one of possibly multiple open surfaces
+
 Returns vectors for x_contour and y_contour
 """
 function contour_from_midplane(values::Matrix{T},
@@ -188,12 +191,11 @@ end
                           y_coords::AbstractVector{T},
                           level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
 
-Find a contour of (x_coords, y_coords, values) at value=level
-    that crosses y=yaxis at the smallest x > xaxis
-This will correspond to a closed surface around the axis if it exists,
-    otherwise it will give upto one of possibly multiple open surfaces
-The contour is computed in-place using x_cache and y_cache,
-    and returned as `view`s of those caches to avoid allocations
+Find a contour of (x_coords, y_coords, values) at value=level that crosses y=yaxis at the smallest x > xaxis
+
+This will correspond to a closed surface around the axis if it exists, otherwise it will give upto one of possibly multiple open surfaces
+
+The contour is computed in-place using x_cache and y_cache, and returned as `view`s of those caches to avoid allocations
 """
 function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
                           values::Matrix{T},
