@@ -24,7 +24,7 @@ const EDGE_TABLE = @SVector[
     [SVector{2, Int}(1, 2)],                           # 1011
     [SVector{2, Int}(4, 1)],                           # 0111
     SVector{2, Int}[],                                 # 1111
-    [SVector{2, Int}(3, 4), SVector{2, Int}(2, 1)],    # 1010 alternate
+    [SVector{2, Int}(3, 4), SVector{2, Int}(1, 2)],    # 1010 alternate
     [SVector{2, Int}(4, 1), SVector{2, Int}(2, 3)]     # 0101 alternate
 ]
 
@@ -272,7 +272,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             nforward += 1
             x_cache[nforward], y_cache[nforward] = point2
             i, j = next_forward(i, j, edges[1])
-        elseif length(edges) > 2
+        elseif length(edges) == 2
             # There's a saddle point, so check the second segment in the cell
             point1, point2 = get_segment(edges[2], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
             if point1[1] ≈ x_cache[nforward] && point1[2] ≈ y_cache[nforward]
@@ -281,10 +281,10 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
                 x_cache[nforward], y_cache[nforward] = point2
                 i, j = next_forward(i, j, edges[2])
             else
-                @error "Failed to connect to last point"
+                error("Failed to connect to last point")
             end
         else
-            @error "Failed to connect to last point"
+            error("Failed to connect to last point")
         end
 
         if point2[1] ≈ first_point[1] && point2[2] ≈ first_point[2]
@@ -321,7 +321,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             nbackward += 1
             x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
             i, j = next_backward(i, j, edges[1])
-        elseif length(edges) > 2
+        elseif length(edges) == 2
             # There's a saddle point, so check the second segment in the cell
 
             # points in reverse
@@ -332,10 +332,10 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
                 x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
                 i, j = next_backward(i, j, edges[2])
             else
-                @error "Failed to connect to last point"
+                error("Failed to connect to last point")
             end
         else
-            @error "Failed to connect to last point"
+            error("Failed to connect to last point")
         end
 
         if point2[1] ≈ last_forward[1] && point2[2] ≈ last_forward[2]
