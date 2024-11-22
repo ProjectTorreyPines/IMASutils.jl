@@ -354,11 +354,11 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
     x_contour = @view x_cache[1:(nforward + nbackward)]
     y_contour = @view y_cache[1:(nforward + nbackward)]
 
-    if direction === :increasing
+    if direction === :decreasing
         # all the points will be clockwise, so reverse them
         reverse!(x_contour)
         reverse!(y_contour)
-    end # if :decreasing, they're already CCW
+    end # if :increasing, they're already CCW
 
     return x_contour, y_contour
 
