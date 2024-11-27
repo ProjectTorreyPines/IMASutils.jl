@@ -253,6 +253,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
     x_cache[nforward], y_cache[nforward] = first_point
     nforward = 2
     x_cache[nforward], y_cache[nforward] = second_point
+    last_point = second_point
 
     # Traverse contour in forward direction
     i, j = next_forward(istart, jstart, first_edges)
@@ -267,18 +268,20 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
         edges = get_edges(v1, v2, v3, v4, level)
 
         point1, point2 = get_segment(edges[1], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-        if point1[1] ≈ x_cache[nforward] && point1[2] ≈ y_cache[nforward]
+        if point1 ≈ last_point
             # First (usually only) segment in cell connects to previous segment
             nforward += 1
             x_cache[nforward], y_cache[nforward] = point2
+            last_point = point2
             i, j = next_forward(i, j, edges[1])
         elseif length(edges) == 2
             # There's a saddle point, so check the second segment in the cell
             point1, point2 = get_segment(edges[2], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-            if point1[1] ≈ x_cache[nforward] && point1[2] ≈ y_cache[nforward]
+            if point1 ≈ last_point
                 # this connects
                 nforward += 1
                 x_cache[nforward], y_cache[nforward] = point2
+                last_point = point2
                 i, j = next_forward(i, j, edges[2])
             else
                 error("Failed to connect to last point")
@@ -287,7 +290,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             error("Failed to connect to last point")
         end
 
-        if point2[1] ≈ first_point[1] && point2[2] ≈ first_point[2]
+        if point2 ≈ first_point
             # This is a closed contour
             x_cache[nforward], y_cache[nforward] = x_cache[1], y_cache[1]
             status = 2
@@ -301,6 +304,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
         last_forward = SVector(x_cache[nforward], y_cache[nforward])
     end
     nbackward = 0
+    last_point = first_point
     while status == 1
 
         if i < 1 || j < 1 || i >= nx || j >= ny
@@ -315,21 +319,22 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
 
         # points in reverse
         point2, point1 = get_segment(edges[1], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-        last = (nbackward == 0) ? 1 : nforward + nbackward
-        if point1[1] ≈ x_cache[last] && point1[2] ≈ y_cache[last]
+        if point1 ≈ last_point
             # First (usually only) segment in cell connects to previous segment
             nbackward += 1
             x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
+            last_point = point2
             i, j = next_backward(i, j, edges[1])
         elseif length(edges) == 2
             # There's a saddle point, so check the second segment in the cell
 
             # points in reverse
             point2, point1 = get_segment(edges[2], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-            if point1[1] ≈ x_cache[last] && point1[2] ≈ y_cache[last]
+            if point1 ≈ last_point
                 # this connects
                 nbackward += 1
                 x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
+                last_point = point2
                 i, j = next_backward(i, j, edges[2])
             else
                 error("Failed to connect to last point")
@@ -338,7 +343,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             error("Failed to connect to last point")
         end
 
-        if point2[1] ≈ last_forward[1] && point2[2] ≈ last_forward[2]
+        if point2 ≈ last_forward
             # We have a closed contour, so it must be tangent to the boundary
             x_cache[nforward + nbackward], y_cache[nforward + nbackward] = x_cache[nforward], y_cache[nforward]
             status = 4
