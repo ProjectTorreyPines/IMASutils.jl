@@ -183,25 +183,33 @@ end
     return x_empty, y_empty
 end
 
+# compare (x, y) of each point within atol and rtol
+@inline function approx_point(a::SVector{2, T}, b::SVector{2, T}; atol=eps(T), rtol=sqrt(eps(T))) where {T<:Real}
+    return isapprox(a[1], b[1]; atol, rtol) && isapprox(a[2], b[2]; atol, rtol)
+end
 
 """
     contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
-                          values::Matrix{T},
-                          x_coords::AbstractVector{T},
-                          y_coords::AbstractVector{T},
-                          level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
+                           values::Matrix{T},
+                           x_coords::AbstractVector{T},
+                           y_coords::AbstractVector{T},
+                           level::T, xaxis::T, yaxis::T, vaxis::T;
+                           atol::T=eps(T), rtol::T=sqrt(eps(T))) where {T<:Real}
 
 Find a contour of (x_coords, y_coords, values) at value=level that crosses y=yaxis at the smallest x > xaxis
 
 This will correspond to a closed surface around the axis if it exists, otherwise it will give upto one of possibly multiple open surfaces
 
 The contour is computed in-place using x_cache and y_cache, and returned as `view`s of those caches to avoid allocations
+
+atol and rtol are used for checking if the contour closes on itself in every cell
 """
 function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
-                          values::Matrix{T},
-                          x_coords::AbstractVector{T},
-                          y_coords::AbstractVector{T},
-                          level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
+                                values::Matrix{T},
+                                x_coords::AbstractVector{T},
+                                y_coords::AbstractVector{T},
+                                level::T, xaxis::T, yaxis::T, vaxis::T;
+                                atol::T=eps(T), rtol::T=sqrt(eps(T))) where {T<:Real}
 
     x_cache .= NaN
     y_cache .= NaN
@@ -268,7 +276,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
         edges = get_edges(v1, v2, v3, v4, level)
 
         point1, point2 = get_segment(edges[1], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-        if point1 ≈ last_point
+        if approx_point(point1, last_point; atol, rtol)
             # First (usually only) segment in cell connects to previous segment
             nforward += 1
             x_cache[nforward], y_cache[nforward] = point2
@@ -277,7 +285,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
         elseif length(edges) == 2
             # There's a saddle point, so check the second segment in the cell
             point1, point2 = get_segment(edges[2], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-            if point1 ≈ last_point
+            if approx_point(point1, last_point; atol, rtol)
                 # this connects
                 nforward += 1
                 x_cache[nforward], y_cache[nforward] = point2
@@ -290,7 +298,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             error("Failed to connect to last point")
         end
 
-        if point2 ≈ first_point
+        if approx_point(point2, first_point; atol, rtol)
             # This is a closed contour
             x_cache[nforward], y_cache[nforward] = x_cache[1], y_cache[1]
             status = 2
@@ -319,7 +327,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
 
         # points in reverse
         point2, point1 = get_segment(edges[1], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-        if point1 ≈ last_point
+        if approx_point(point1, last_point; atol, rtol)
             # First (usually only) segment in cell connects to previous segment
             nbackward += 1
             x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
@@ -330,7 +338,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
 
             # points in reverse
             point2, point1 = get_segment(edges[2], x_coords, y_coords, i, j, v1, v2, v3, v4, level)
-            if point1 ≈ last_point
+            if approx_point(point1, last_point; atol, rtol)
                 # this connects
                 nbackward += 1
                 x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
@@ -343,7 +351,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             error("Failed to connect to last point")
         end
 
-        if point2 ≈ last_forward
+        if approx_point(point2, last_forward; atol, rtol)
             # We have a closed contour, so it must be tangent to the boundary
             x_cache[nforward + nbackward], y_cache[nforward + nbackward] = x_cache[nforward], y_cache[nforward]
             status = 4
