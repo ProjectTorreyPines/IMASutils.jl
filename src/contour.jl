@@ -255,7 +255,13 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
 
     # Store the first two points in the forward direction
     v1, v2, v3, v4 = get_vertices_inbounds(values, istart, jstart)
-    first_edges = get_edges(v1, v2, v3, v4, level)[1] # either it's open or the first one is the closed one
+    edges = get_edges(v1, v2, v3, v4, level)
+    if isempty(edges)
+        x_contour = @view x_cache[1:0]
+        y_contour = @view y_cache[1:0]
+        return x_contour, y_contour
+    end
+    first_edges = edges[1] # either it's open or the first one is the closed one
     first_point, second_point = get_segment(first_edges, x_coords, y_coords, istart, jstart, v1, v2, v3, v4, level)
     nforward = 1
     x_cache[nforward], y_cache[nforward] = first_point
