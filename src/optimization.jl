@@ -39,7 +39,7 @@ function _findall_interior_extrema(fext::F, A::AbstractMatrix) where {F<:Functio
     Ni, Nj = size(A)
     @assert Ni > 2
     @assert Nj > 2
-    pts = Tuple{Int, Int}[]
+    pts = Tuple{Int,Int}[]
     for j in 2:(Nj-1)
         for i in 2:(Ni-1)
             if @inbounds A[i, j] == fext(@view(A[i-1:i+1, j-1:j+1]))
