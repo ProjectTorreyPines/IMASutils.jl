@@ -188,6 +188,15 @@ end
     return isapprox(a[1], b[1]; atol, rtol) && isapprox(a[2], b[2]; atol, rtol)
 end
 
+@inline function insert_point!(x_cache, y_cache, k,  point; dynamic_resize::Bool=true)
+    N = length(x_cache)
+    if dynamic_resize && (k > N)
+        resize!(x_cache, 2N)
+        resize!(y_cache, 2N)
+    end
+    x_cache[k], y_cache[k] = point
+end
+
 """
     contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
                            values::Matrix{T},
@@ -209,7 +218,8 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
                                 x_coords::AbstractVector{T},
                                 y_coords::AbstractVector{T},
                                 level::T, xaxis::T, yaxis::T, vaxis::T;
-                                atol::T=eps(T), rtol::T=sqrt(eps(T))) where {T<:Real}
+                                atol::T=eps(T), rtol::T=sqrt(eps(T)),
+                                dynamic_resize::Bool=true) where {T<:Real}
 
     x_cache .= NaN
     y_cache .= NaN
@@ -264,9 +274,9 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
     first_edges = edges[1] # either it's open or the first one is the closed one
     first_point, second_point = get_segment(first_edges, x_coords, y_coords, istart, jstart, v1, v2, v3, v4, level)
     nforward = 1
-    x_cache[nforward], y_cache[nforward] = first_point
+    insert_point!(x_cache, y_cache, nforward, first_point; dynamic_resize)
     nforward = 2
-    x_cache[nforward], y_cache[nforward] = second_point
+    insert_point!(x_cache, y_cache, nforward, second_point; dynamic_resize)
     last_point = second_point
 
     # Traverse contour in forward direction
@@ -285,7 +295,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
         if approx_point(point1, last_point; atol, rtol)
             # First (usually only) segment in cell connects to previous segment
             nforward += 1
-            x_cache[nforward], y_cache[nforward] = point2
+            insert_point!(x_cache, y_cache, nforward, point2; dynamic_resize)
             last_point = point2
             i, j = next_forward(i, j, edges[1])
         elseif length(edges) == 2
@@ -294,7 +304,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             if approx_point(point1, last_point; atol, rtol)
                 # this connects
                 nforward += 1
-                x_cache[nforward], y_cache[nforward] = point2
+                insert_point!(x_cache, y_cache, nforward, point2; dynamic_resize)
                 last_point = point2
                 i, j = next_forward(i, j, edges[2])
             else
@@ -306,7 +316,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
 
         if approx_point(point2, first_point; atol, rtol)
             # This is a closed contour
-            x_cache[nforward], y_cache[nforward] = x_cache[1], y_cache[1]
+            insert_point!(x_cache, y_cache, nforward, (x_cache[1], y_cache[1]); dynamic_resize)
             status = 2
         end
     end
@@ -336,7 +346,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
         if approx_point(point1, last_point; atol, rtol)
             # First (usually only) segment in cell connects to previous segment
             nbackward += 1
-            x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
+            insert_point!(x_cache, y_cache, nforward + nbackward, point2; dynamic_resize)
             last_point = point2
             i, j = next_backward(i, j, edges[1])
         elseif length(edges) == 2
@@ -347,7 +357,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             if approx_point(point1, last_point; atol, rtol)
                 # this connects
                 nbackward += 1
-                x_cache[nforward + nbackward], y_cache[nforward + nbackward] = point2
+                insert_point!(x_cache, y_cache, nforward + nbackward, point2; dynamic_resize)
                 last_point = point2
                 i, j = next_backward(i, j, edges[2])
             else
@@ -359,7 +369,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
 
         if approx_point(point2, last_forward; atol, rtol)
             # We have a closed contour, so it must be tangent to the boundary
-            x_cache[nforward + nbackward], y_cache[nforward + nbackward] = x_cache[nforward], y_cache[nforward]
+            insert_point!(x_cache, y_cache, nforward + nbackward, (x_cache[nforward], y_cache[nforward]); dynamic_resize)
             status = 4
         end
     end
