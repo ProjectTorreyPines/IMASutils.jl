@@ -49,6 +49,13 @@ end
     @test (xc2 isa Vector) && (yc2 isa Vector)
     @test all(x_contour .== xc2) && all(y_contour .== yc2)
 
+     # test dynamic resizing
+     x_dynamic, y_dynamic = Vector{Float64}(undef, 1), Vector{Float64}(undef, 1)
+     level = vaxis + 0.2
+     xc2, yc2 = contour_from_midplane!(x_dynamic, y_dynamic, values, x_coords, y_coords, level, xaxis, yaxis, vaxis)
+     @test all(x_contour .== xc2) && all(y_contour .== yc2)
+     @test (length(x_dynamic) == length(y_dynamic) == 2^4)  # should double four times
+
     # test reversed
     level = -(vaxis + 0.2)
     xc2, yc2 = contour_from_midplane!(x_cache, y_cache, .-values, x_coords, y_coords, level, xaxis, yaxis, vaxis)
@@ -71,6 +78,5 @@ end
     level = vaxis + 0.01
     x_contour, y_contour = contour_from_midplane!(x_cache, y_cache, values, x_coords, y_coords, level, xaxis, yaxis, vaxis)
     @test isempty(x_contour) && isempty(y_contour)
-
 
 end
