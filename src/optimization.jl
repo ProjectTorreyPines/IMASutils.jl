@@ -1,10 +1,10 @@
 """
-    mirror_bound(x::T, l::T, u::T) where {T<:Real}
+    mirror_bound(x::Real, l::Real, u::Real)
 
 Return tuple with value of x bounded between l and u
 The bounding is done by mirroring the value at the bound limits.
 """
-function mirror_bound(x::T, l::T, u::T) where {T<:Real}
+function mirror_bound(x::Real, l::Real, u::Real)
     d = (u - l) / 2.0
     c = (u + l) / 2.0
     x0 = (x .- c) / d
