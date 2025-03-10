@@ -42,7 +42,6 @@ jobs:
             using Pkg
             Pkg.activate("docs")
             Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()
           '
 
       - uses: julia-actions/julia-buildpkg@v1
