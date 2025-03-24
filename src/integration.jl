@@ -48,10 +48,16 @@ end
 Computes the cumulative integral of the values in `y` with respect to `x` using the trapezoidal rule.
 """
 function cumtrapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
+    retarr = Vector{promote_type(S, T)}(undef, length(x))
+    cumtrapz!(retarr, x, y)
+    return retarr
+end
+
+function cumtrapz!(retarr::AbstractVector, x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
     N = length(x)
-    @assert N>=2
+    @assert N >= 2
     @assert length(y) == N
-    retarr = Vector{promote_type(S, T)}(undef, N)
+    @assert length(retarr) == N
     @inbounds begin
         retarr[1] = 0.0
         for k in eachindex(x)[2:end]
@@ -68,13 +74,19 @@ end
 Computes the cumulative integral of `f(k::Int, xx::S)` for `xx = x[k]` with respect to `x` using the trapezoidal rule.
 """
 function cumtrapz(x::AbstractVector{S}, f::T) where {S<:Real, T<:Function}
-    N = length(x)
-    @assert N>=2
-    y = k -> f(k, x[k])
+    f1 = f(1, x[1])
+    retarr = Vector{promote_type(S, typeof(f1))}(undef, length(x))
+    cumtrapz!(retarr, x, f)
+    return retarr
+end
 
+function cumtrapz!(retarr::AbstractVector, x::AbstractVector{S}, f::T) where {S<:Real, T<:Function}
+    N = length(x)
+    @assert N >= 2
+    y = k -> f(k, x[k])
     # get type of solution, and also check bounds
     y1, _ = y(1), y(N)
-    retarr = Vector{promote_type(S, typeof(y1))}(undef, N)
+    @assert promote_type(S, typeof(y1)) <: eltype(retarr)
     @inbounds begin
         retarr[1] = 0.0
         for k in eachindex(x)[2:end]

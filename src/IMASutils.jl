@@ -3,7 +3,7 @@ module IMASutils
 import StaticArrays: SVector, @SVector
 
 include("integration.jl")
-export trapz, cumtrapz
+export trapz, cumtrapz, cumtrapz!
 
 include("optimization.jl")
 export mirror_bound
