@@ -2,6 +2,9 @@ module IMASutils
 
 import StaticArrays: SVector, @SVector
 
+include("basic.jl")
+export argmin_abs
+
 include("integration.jl")
 export trapz, cumtrapz, cumtrapz!
 
