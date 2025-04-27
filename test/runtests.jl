@@ -30,11 +30,11 @@ end
     y_coords = range(-1, 1, ny)
     values = [(x - xaxis)^2 + (y - yaxis)^2 for x in x_coords, y in y_coords] .+ vaxis
 
-    x_cache, y_cache = contour_cache(values; aggression_level=1)
+    x_cache, y_cache = contour_cache(x_coords, y_coords; aggression_level=1)
     @test length(x_cache)  == length(y_cache) == ceil(Int, π * sqrt(2.0 * (nx^2 + ny^2)))
-    x_cache, y_cache = contour_cache(values; aggression_level=3)
+    x_cache, y_cache = contour_cache(x_coords, y_coords; aggression_level=3)
     @test length(x_cache) == length(y_cache) == nx * ny
-    x_cache, y_cache = contour_cache(values)
+    x_cache, y_cache = contour_cache(x_coords, y_coords)
     @test length(x_cache) == length(y_cache) == 2.0 * (nx + ny)
 
     # test closed

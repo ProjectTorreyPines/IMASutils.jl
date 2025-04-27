@@ -128,10 +128,9 @@ end
 
 
 """
-    contour_cache(values::Matrix{T}; aggression_level::Int = 2) where {T<:Real}
+    contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T}; aggression_level::Int = 2) where {T<:Real}
 
-For a given matrix `values`, create cache for x_contour and y_contour
-`aggression_level` determines how large to make the cache:
+For a given `x_coords` and`y_coords`, create cache for x_contour and y_contour `aggression_level` determines how large to make the cache:
 
 1. assume contour no bigger than an inscribed ellipse
 
@@ -139,9 +138,10 @@ For a given matrix `values`, create cache for x_contour and y_contour
 
 3. assume contour could go through every single cell once
 """
-function contour_cache(values::Matrix{T}; aggression_level::Int = 2) where {T<:Real}
+function contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T}; aggression_level::Int = 2) where {T<:Real}
     @assert aggression_level in (1, 2, 3)
-    nx, ny = size(values)
+    nx = length(x_coords)
+    ny = length(y_coords)
     if aggression_level == 1
         # assume inscribed ellipse length
         Ncache = ceil(Int, π * sqrt(2.0 * (nx^2 + ny^2)))
@@ -171,7 +171,7 @@ function contour_from_midplane(values::Matrix{T},
                           x_coords::AbstractVector{T},
                           y_coords::AbstractVector{T},
                           level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
-    x_cache, y_cache = contour_cache(values)
+    x_cache, y_cache = contour_cache(x_coords, y_coords)
     x_contour, y_contour = contour_from_midplane!(x_cache, y_cache, values, x_coords, y_coords, level, xaxis, yaxis, vaxis)
     return collect(x_contour), collect(y_contour)
 end
