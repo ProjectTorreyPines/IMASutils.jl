@@ -29,7 +29,7 @@ const EDGE_TABLE = @SVector[
 ]
 
 # Helper function to interpolate between two points
-@inline function interpolate(p1::SVector{2,T}, p2::SVector{2,T}, v1::T, v2::T, c::T) where {T<:Real}
+@inline function interpolate(p1::SVector{2,T1}, p2::SVector{2,T1}, v1::T2, v2::T2, c::T2) where {T1<:Real,T2<:Real}
     t = (c - v1) / (v2 - v1)
     return p1 + t * (p2 - p1)
 end
@@ -66,7 +66,7 @@ end
 
 
 # Compute the intersecting point of the contour with this edge
-@inline function get_point(edge::Int, x_coords::AbstractVector{T}, y_coords::AbstractVector{T}, i::Int, j::Int, v1::T, v2::T, v3::T, v4::T, level::T) where {T<:Real}
+@inline function get_point(edge::Int, x_coords::AbstractVector{T1}, y_coords::AbstractVector{T1}, i::Int, j::Int, v1::T2, v2::T2, v3::T2, v4::T2, level::T2) where {T1<:Real,T2<:Real}
     if edge == 1
         p1 = SVector(x_coords[i], y_coords[j])
         p2 = SVector(x_coords[i+1], y_coords[j])
@@ -189,19 +189,19 @@ end
 
 """
     contour_from_midplane!(
-        x_cache::Vector{T},
-        y_cache::Vector{T},
-        values::Matrix{T},
-        x_coords::AbstractVector{T},
-        y_coords::AbstractVector{T},
-        level::T,
-        xaxis::T,
-        yaxis::T,
-        vaxis::T;
-        atol::T=eps(T),
-        rtol::T=sqrt(eps(T)),
+        x_cache::Vector{T1},
+        y_cache::Vector{T1},
+        values::Matrix{T2},
+        x_coords::AbstractVector{T1},
+        y_coords::AbstractVector{T1},
+        level::T2,
+        xaxis::T1,
+        yaxis::T1,
+        vaxis::T2;
+        atol::T1=eps(T1),
+        rtol::T1=sqrt(eps(T1)),
         dynamic_resize::Bool=true
-    ) where {T<:Real}
+    ) where {T1<:Real, T2<:Real}
 
 Find a contour of (x_coords, y_coords, values) at value=level that crosses y=yaxis at the smallest x > xaxis
 
@@ -212,19 +212,19 @@ The contour is computed in-place using x_cache and y_cache, and returned as `vie
 atol and rtol are used for checking if the contour closes on itself in every cell
 """
 function contour_from_midplane!(
-    x_cache::Vector{T},
-    y_cache::Vector{T},
-    values::Matrix{T},
-    x_coords::AbstractVector{T},
-    y_coords::AbstractVector{T},
-    level::T,
-    xaxis::T,
-    yaxis::T,
-    vaxis::T;
-    atol::T=eps(T),
-    rtol::T=sqrt(eps(T)),
+    x_cache::Vector{T1},
+    y_cache::Vector{T1},
+    values::Matrix{T2},
+    x_coords::AbstractVector{T1},
+    y_coords::AbstractVector{T1},
+    level::T2,
+    xaxis::T1,
+    yaxis::T1,
+    vaxis::T2;
+    atol::T1=eps(T1),
+    rtol::T1=sqrt(eps(T1)),
     dynamic_resize::Bool=true
-) where {T<:Real}
+) where {T1<:Real, T2<:Real}
 
     x_cache .= NaN
     y_cache .= NaN
@@ -330,7 +330,7 @@ function contour_from_midplane!(
     # the first two points we're already recorded last time
     if status == 1
         i, j = next_backward(istart, jstart, first_edges)
-        last_forward = SVector(x_cache[nforward], y_cache[nforward])
+        last_forward = SVector{2,T2}(x_cache[nforward], y_cache[nforward])
     end
     nbackward = 0
     last_point = first_point
