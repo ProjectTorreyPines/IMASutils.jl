@@ -66,7 +66,18 @@ end
 
 
 # Compute the intersecting point of the contour with this edge
-@inline function get_point(edge::Int, x_coords::AbstractVector{T1}, y_coords::AbstractVector{T1}, i::Int, j::Int, v1::T2, v2::T2, v3::T2, v4::T2, level::T2) where {T1<:Real,T2<:Real}
+@inline function get_point(
+    edge::Int,
+    x_coords::AbstractVector{T1},
+    y_coords::AbstractVector{T1},
+    i::Int,
+    j::Int,
+    v1::T2,
+    v2::T2,
+    v3::T2,
+    v4::T2,
+    level::T2
+) where {T1<:Real,T2<:Real}
     if edge == 1
         p1 = SVector(x_coords[i], y_coords[j])
         p2 = SVector(x_coords[i+1], y_coords[j])
@@ -124,20 +135,27 @@ function next_backward(i, j, edges)
 end
 
 
+function contour_cache(values::Matrix{T}; aggression_level::Int=2) where {T<:Real}
+    return contour_cache(eltype(values), size(values)...; aggression_level)
+end
+
+function contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T}; aggression_level::Int=2) where {T<:Real}
+    return contour_cache(eltype(x_coords), length(x_coords), length(y_coords); aggression_level)
+end
+
 """
     contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T}; aggression_level::Int = 2) where {T<:Real}
 
-For a given `x_coords` and`y_coords`, create cache for x_contour and y_contour `aggression_level` determines how large to make the cache:
+Create cache for contouring matrix of size nx times ny
+
+`aggression_level` determines how large to make the cache:
 
  1. assume contour no bigger than an inscribed ellipse
-
  2. assume contour no bigger than the other boundary
  3. assume contour could go through every single cell once
 """
-function contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T}; aggression_level::Int=2) where {T<:Real}
+function contour_cache(T::Type, nx::Int, ny::Int; aggression_level::Int=2)
     @assert aggression_level in (1, 2, 3)
-    nx = length(x_coords)
-    ny = length(y_coords)
     if aggression_level == 1
         # assume inscribed ellipse length
         Ncache = ceil(Int, π * sqrt(2.0 * (nx^2 + ny^2)))
@@ -224,7 +242,7 @@ function contour_from_midplane!(
     atol::T1=eps(T1),
     rtol::T1=sqrt(eps(T1)),
     dynamic_resize::Bool=true
-) where {T1<:Real, T2<:Real}
+) where {T1<:Real,T2<:Real}
 
     x_cache .= NaN
     y_cache .= NaN
