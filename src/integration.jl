@@ -3,9 +3,9 @@
 
 Numerically integrates the values in `y` with respect to `x` using the trapezoidal rule.
 """
-function trapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
+function trapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
     N = length(x)
-    @assert N>=2
+    @assert N >= 2
     @assert length(y) == N
     t = zero(promote_type(T, S))
     @inbounds begin
@@ -23,9 +23,9 @@ end
 
 Numerically integrates `f(k::Int, xx::S)` for `xx = x[k]` with respect to `x` using the trapezoidal rule.
 """
-function trapz(x::AbstractVector{S}, f::T) where {S<:Real, T<:Function}
+function trapz(x::AbstractVector{S}, f::T) where {S<:Real,T<:Function}
     N = length(x)
-    @assert N>=2
+    @assert N >= 2
     y = k -> f(k, x[k])
 
     # get type of solution, and also check bounds
@@ -47,13 +47,13 @@ end
 
 Computes the cumulative integral of the values in `y` with respect to `x` using the trapezoidal rule.
 """
-function cumtrapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
+function cumtrapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
     retarr = Vector{promote_type(S, T)}(undef, length(x))
     cumtrapz!(retarr, x, y)
     return retarr
 end
 
-function cumtrapz!(retarr::AbstractVector, x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
+function cumtrapz!(retarr::AbstractVector, x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
     N = length(x)
     @assert N >= 2
     @assert length(y) == N
@@ -73,14 +73,14 @@ end
 
 Computes the cumulative integral of `f(k::Int, xx::S)` for `xx = x[k]` with respect to `x` using the trapezoidal rule.
 """
-function cumtrapz(x::AbstractVector{S}, f::T) where {S<:Real, T<:Function}
+function cumtrapz(x::AbstractVector{S}, f::T) where {S<:Real,T<:Function}
     f1 = f(1, x[1])
     retarr = Vector{promote_type(S, typeof(f1))}(undef, length(x))
     cumtrapz!(retarr, x, f)
     return retarr
 end
 
-function cumtrapz!(retarr::AbstractVector, x::AbstractVector{S}, f::T) where {S<:Real, T<:Function}
+function cumtrapz!(retarr::AbstractVector, x::AbstractVector{S}, f::T) where {S<:Real,T<:Function}
     N = length(x)
     @assert N >= 2
     y = k -> f(k, x[k])
@@ -90,7 +90,7 @@ function cumtrapz!(retarr::AbstractVector, x::AbstractVector{S}, f::T) where {S<
     @inbounds begin
         retarr[1] = 0.0
         for k in eachindex(x)[2:end]
-            retarr[k] = retarr[k-1] + (y(k) + y(k-1)) * (x[k] - x[k-1])
+            retarr[k] = retarr[k-1] + (y(k) + y(k - 1)) * (x[k] - x[k-1])
         end
         retarr .*= 0.5
     end

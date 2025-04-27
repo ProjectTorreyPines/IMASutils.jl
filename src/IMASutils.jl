@@ -15,6 +15,6 @@ include("contour.jl")
 export contour_cache, contour_from_midplane, contour_from_midplane!
 
 const document = Dict()
-document[Symbol(@__MODULE__)] = [name for name in Base.names(@__MODULE__, all=false, imported=false) if name != Symbol(@__MODULE__)]
+document[Symbol(@__MODULE__)] = [name for name in Base.names(@__MODULE__; all=false, imported=false) if name != Symbol(@__MODULE__)]
 
 end

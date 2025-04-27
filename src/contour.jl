@@ -8,30 +8,28 @@
 #   default assumes the value at the cell center is less than the level value
 #   alternate assumes the value at the cell center is greater than the level value
 const EDGE_TABLE = @SVector[
-    SVector{2, Int}[],                                 # 0000
-    [SVector{2, Int}(1, 4)],                           # 1000
-    [SVector{2, Int}(2, 1)],                           # 0100
-    [SVector{2, Int}(2, 4)],                           # 1100
-    [SVector{2, Int}(3, 2)],                           # 0010
-    [SVector{2, Int}(1, 4), SVector{2, Int}(3, 2)],    # 1010 default
-    [SVector{2, Int}(3, 1)],                           # 0110
-    [SVector{2, Int}(3, 4)],                           # 1110
-    [SVector{2, Int}(4, 3)],                           # 0001
-    [SVector{2, Int}(1, 3)],                           # 1001
-    [SVector{2, Int}(4, 3), SVector{2, Int}(2, 1)],    # 0101 default
-    [SVector{2, Int}(2, 3)],                           # 1101
-    [SVector{2, Int}(4, 2)],                           # 0011
-    [SVector{2, Int}(1, 2)],                           # 1011
-    [SVector{2, Int}(4, 1)],                           # 0111
-    SVector{2, Int}[],                                 # 1111
-    [SVector{2, Int}(3, 4), SVector{2, Int}(1, 2)],    # 1010 alternate
-    [SVector{2, Int}(4, 1), SVector{2, Int}(2, 3)]     # 0101 alternate
+    SVector{2,Int}[],                                 # 0000
+    [SVector{2,Int}(1, 4)],                           # 1000
+    [SVector{2,Int}(2, 1)],                           # 0100
+    [SVector{2,Int}(2, 4)],                           # 1100
+    [SVector{2,Int}(3, 2)],                           # 0010
+    [SVector{2,Int}(1, 4), SVector{2,Int}(3, 2)],    # 1010 default
+    [SVector{2,Int}(3, 1)],                           # 0110
+    [SVector{2,Int}(3, 4)],                           # 1110
+    [SVector{2,Int}(4, 3)],                           # 0001
+    [SVector{2,Int}(1, 3)],                           # 1001
+    [SVector{2,Int}(4, 3), SVector{2,Int}(2, 1)],    # 0101 default
+    [SVector{2,Int}(2, 3)],                           # 1101
+    [SVector{2,Int}(4, 2)],                           # 0011
+    [SVector{2,Int}(1, 2)],                           # 1011
+    [SVector{2,Int}(4, 1)],                           # 0111
+    SVector{2,Int}[],                                 # 1111
+    [SVector{2,Int}(3, 4), SVector{2,Int}(1, 2)],    # 1010 alternate
+    [SVector{2,Int}(4, 1), SVector{2,Int}(2, 3)]     # 0101 alternate
 ]
 
 # Helper function to interpolate between two points
-@inline function interpolate(p1::SVector{2, T},
-                             p2::SVector{2, T},
-                             v1::T, v2::T, c::T) where {T<:Real}
+@inline function interpolate(p1::SVector{2,T}, p2::SVector{2,T}, v1::T, v2::T, c::T) where {T<:Real}
     t = (c - v1) / (v2 - v1)
     return p1 + t * (p2 - p1)
 end
@@ -68,8 +66,7 @@ end
 
 
 # Compute the intersecting point of the contour with this edge
-@inline function get_point(edge::Int, x_coords::AbstractVector{T}, y_coords::AbstractVector{T},
-                           i::Int, j::Int, v1::T, v2::T, v3::T, v4::T, level::T) where {T<:Real}
+@inline function get_point(edge::Int, x_coords::AbstractVector{T}, y_coords::AbstractVector{T}, i::Int, j::Int, v1::T, v2::T, v3::T, v4::T, level::T) where {T<:Real}
     if edge == 1
         p1 = SVector(x_coords[i], y_coords[j])
         p2 = SVector(x_coords[i+1], y_coords[j])
@@ -102,13 +99,13 @@ end
 function next_forward(i, j, edges)
     fedge = edges[2]
     if fedge == 1
-        return i, j-1
+        return i, j - 1
     elseif fedge == 2
-        return i+1, j
+        return i + 1, j
     elseif fedge == 3
-        return i, j+1
+        return i, j + 1
     elseif fedge == 4
-        return i-1, j
+        return i - 1, j
     end
 end
 
@@ -116,13 +113,13 @@ end
 function next_backward(i, j, edges)
     bedge = edges[1]
     if bedge == 1
-        return i, j-1
+        return i, j - 1
     elseif bedge == 2
-        return i+1, j
+        return i + 1, j
     elseif bedge == 3
-        return i, j+1
+        return i, j + 1
     elseif bedge == 4
-        return i-1, j
+        return i - 1, j
     end
 end
 
@@ -132,13 +129,12 @@ end
 
 For a given `x_coords` and`y_coords`, create cache for x_contour and y_contour `aggression_level` determines how large to make the cache:
 
-1. assume contour no bigger than an inscribed ellipse
+ 1. assume contour no bigger than an inscribed ellipse
 
-2. assume contour no bigger than the other boundary
-
-3. assume contour could go through every single cell once
+ 2. assume contour no bigger than the other boundary
+ 3. assume contour could go through every single cell once
 """
-function contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T}; aggression_level::Int = 2) where {T<:Real}
+function contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T}; aggression_level::Int=2) where {T<:Real}
     @assert aggression_level in (1, 2, 3)
     nx = length(x_coords)
     ny = length(y_coords)
@@ -156,10 +152,7 @@ function contour_cache(x_coords::AbstractVector{T}, y_coords::AbstractVector{T};
 end
 
 """
-    contour_from_midplane(values::Matrix{T},
-                          x_coords::AbstractVector{T},
-                          y_coords::AbstractVector{T},
-                          level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
+    contour_from_midplane(values::Matrix{T}, x_coords::AbstractVector{T}, y_coords::AbstractVector{T}, level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
 
 Find a contour of (x_coords, y_coords, values) at value=level that crosses y=yaxis at the smallest x > xaxis
 
@@ -167,10 +160,7 @@ This will correspond to a closed surface around the axis if it exists, otherwise
 
 Returns vectors for x_contour and y_contour
 """
-function contour_from_midplane(values::Matrix{T},
-                          x_coords::AbstractVector{T},
-                          y_coords::AbstractVector{T},
-                          level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
+function contour_from_midplane(values::Matrix{T}, x_coords::AbstractVector{T}, y_coords::AbstractVector{T}, level::T, xaxis::T, yaxis::T, vaxis::T) where {T<:Real}
     x_cache, y_cache = contour_cache(x_coords, y_coords)
     x_contour, y_contour = contour_from_midplane!(x_cache, y_cache, values, x_coords, y_coords, level, xaxis, yaxis, vaxis)
     return collect(x_contour), collect(y_contour)
@@ -184,26 +174,34 @@ end
 end
 
 # compare (x, y) of each point within atol and rtol
-@inline function approx_point(a::SVector{2, T}, b::SVector{2, T}; atol=eps(T), rtol=sqrt(eps(T))) where {T<:Real}
+@inline function approx_point(a::SVector{2,T}, b::SVector{2,T}; atol=eps(T), rtol=sqrt(eps(T))) where {T<:Real}
     return isapprox(a[1], b[1]; atol, rtol) && isapprox(a[2], b[2]; atol, rtol)
 end
 
-@inline function insert_point!(x_cache, y_cache, k,  point; dynamic_resize::Bool=true)
+@inline function insert_point!(x_cache, y_cache, k, point; dynamic_resize::Bool=true)
     N = length(x_cache)
     if dynamic_resize && (k > N)
         resize!(x_cache, 2N)
         resize!(y_cache, 2N)
     end
-    x_cache[k], y_cache[k] = point
+    return x_cache[k], y_cache[k] = point
 end
 
 """
-    contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
-                           values::Matrix{T},
-                           x_coords::AbstractVector{T},
-                           y_coords::AbstractVector{T},
-                           level::T, xaxis::T, yaxis::T, vaxis::T;
-                           atol::T=eps(T), rtol::T=sqrt(eps(T))) where {T<:Real}
+    contour_from_midplane!(
+        x_cache::Vector{T},
+        y_cache::Vector{T},
+        values::Matrix{T},
+        x_coords::AbstractVector{T},
+        y_coords::AbstractVector{T},
+        level::T,
+        xaxis::T,
+        yaxis::T,
+        vaxis::T;
+        atol::T=eps(T),
+        rtol::T=sqrt(eps(T)),
+        dynamic_resize::Bool=true
+    ) where {T<:Real}
 
 Find a contour of (x_coords, y_coords, values) at value=level that crosses y=yaxis at the smallest x > xaxis
 
@@ -213,13 +211,20 @@ The contour is computed in-place using x_cache and y_cache, and returned as `vie
 
 atol and rtol are used for checking if the contour closes on itself in every cell
 """
-function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
-                                values::Matrix{T},
-                                x_coords::AbstractVector{T},
-                                y_coords::AbstractVector{T},
-                                level::T, xaxis::T, yaxis::T, vaxis::T;
-                                atol::T=eps(T), rtol::T=sqrt(eps(T)),
-                                dynamic_resize::Bool=true) where {T<:Real}
+function contour_from_midplane!(
+    x_cache::Vector{T},
+    y_cache::Vector{T},
+    values::Matrix{T},
+    x_coords::AbstractVector{T},
+    y_coords::AbstractVector{T},
+    level::T,
+    xaxis::T,
+    yaxis::T,
+    vaxis::T;
+    atol::T=eps(T),
+    rtol::T=sqrt(eps(T)),
+    dynamic_resize::Bool=true
+) where {T<:Real}
 
     x_cache .= NaN
     y_cache .= NaN
@@ -241,7 +246,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
     if v1norm > 1 && v2norm > 1 && v3norm > 1 && v4norm > 1
         # contour is inside one grid cell
         return empty_contour(x_cache, y_cache)
-    elseif v1norm >=1 || v2norm >= 1 || v3norm >= 1 || v4norm >= 1
+    elseif v1norm >= 1 || v2norm >= 1 || v3norm >= 1 || v4norm >= 1
         # contour goes through first cell
         istart = ia
     else
@@ -253,7 +258,7 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
             if vnorm >= 1.0
                 # if =1, contour crossing happens in next cell
                 # if >1, then it was in the last cell
-                istart = (vnorm == 1.0) ? i : i-1
+                istart = (vnorm == 1.0) ? i : i - 1
                 break
             end
         end
@@ -380,8 +385,8 @@ function contour_from_midplane!(x_cache::Vector{T}, y_cache::Vector{T},
     reverse!(x_forward)
     reverse!(y_forward)
 
-    x_contour = @view x_cache[1:(nforward + nbackward)]
-    y_contour = @view y_cache[1:(nforward + nbackward)]
+    x_contour = @view x_cache[1:(nforward+nbackward)]
+    y_contour = @view y_cache[1:(nforward+nbackward)]
 
     if direction === :decreasing
         # all the points will be clockwise, so reverse them
