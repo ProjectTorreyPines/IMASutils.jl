@@ -14,6 +14,9 @@ export mirror_bound
 include("contour.jl")
 export contour_cache, contour_from_midplane, contour_from_midplane!
 
+include("buffer.jl")
+export preallocate_buffer, with_buffer, with_buffers
+
 const document = Dict()
 document[Symbol(@__MODULE__)] = [name for name in Base.names(@__MODULE__; all=false, imported=false) if name != Symbol(@__MODULE__)]
 
