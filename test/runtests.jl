@@ -108,6 +108,24 @@ end
         # Test default nbuffers (should be Threads.nthreads())
         pool2 = preallocate_buffer(zeros(10))
         @test pool2.sz_max == Threads.nthreads()
+
+        # Test function initializer signature
+        pool3 = preallocate_buffer(() -> ones(50), 3)
+        @test pool3 isa Channel
+        @test pool3.sz_max == 3
+
+        # Buffers should be initialized with custom values
+        buffers3 = [take!(pool3) for _ in 1:3]
+        @test all(b -> all(b .== 1.0), buffers3)
+
+        # Each buffer should be independent
+        buffers3[1][1] = 42.0
+        @test buffers3[2][1] == 1.0
+
+        # Return buffers
+        for b in buffers3
+            put!(pool3, b)
+        end
     end
 
     # Test with_buffer
