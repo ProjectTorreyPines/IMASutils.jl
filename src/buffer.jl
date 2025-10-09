@@ -4,19 +4,56 @@
 Create a channel of preallocated buffer copies for thread-safe reuse.
 
 # Arguments
-- `A`: Template object to copy (typically an array)
+- `A`: Template object to copy (typically an array). Each buffer slot is initialized
+       as `deepcopy(A)` to ensure independence.
 - `nbuffers`: Number of buffer copies (defaults to thread count)
 
 # Example
-```julia
 buffer_pool = preallocate_buffer(zeros(100))
-# Use with with_buffer() for thread-safe operations
-```
+# Use with with_buffer() for thread-safe operations:
+result = with_buffer(buffer_pool) do buf
+    @. buf = sin(1:100)
+    sum(buf)
+end
+
 """
-function preallocate_buffer(A, nbuffers=Threads.nthreads())
-    ch = Channel{typeof(A)}(nbuffers)
-    for _ in 1:nbuffers
-        put!(ch, deepcopy(A))
+preallocate_buffer(A, nbuffers::Int=Threads.nthreads()) = preallocate_buffer(() -> deepcopy(A), nbuffers)
+
+"""
+    preallocate_buffer(init::Function, nbuffers=Threads.nthreads())
+
+Create a channel of preallocated buffers using a custom initializer function.
+
+Use this when buffers cannot/should not be deep-copied (e.g., FFT plans, objects
+with external pointers) or when you want custom initialization.
+
+# Arguments
+- `init`: A zero-argument function that constructs and returns one fresh buffer.
+- `nbuffers`: Number of buffer instances to create (defaults to thread count)
+
+# Examples
+# 1) Arrays with custom contents
+pool = preallocate_buffer(() -> ones(256))
+
+# 2) FFTW plans (do NOT deepcopy plans)
+using FFTW
+Ppool = preallocate_buffer(() -> plan_fft(zeros(ComplexF64, 1024)))
+
+# Using with with_buffer()
+s = with_buffer(Ppool) do P
+    x = rand(ComplexF64, 1024)
+    y = P * x
+    sum(abs2, y)
+end
+
+"""
+function preallocate_buffer(init::F, nbuffers::Int=Threads.nthreads()) where {F<:Function}
+    @assert nbuffers >= 1
+    first = init()
+    ch = Channel{typeof(first)}(nbuffers)
+    put!(ch, first)
+    for _ in 2:nbuffers
+        put!(ch, init())
     end
     return ch
 end
