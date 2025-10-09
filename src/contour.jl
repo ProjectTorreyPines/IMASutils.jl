@@ -230,23 +230,25 @@ The contour is computed in-place using x_cache and y_cache, and returned as `vie
 atol and rtol are used for checking if the contour closes on itself in every cell
 """
 function contour_from_midplane!(
-    x_cache::Vector{T1},
-    y_cache::Vector{T1},
-    values::Matrix{T2},
-    x_coords::AbstractVector{T1},
-    y_coords::AbstractVector{T1},
-    level::T2,
-    xaxis::T1,
-    yaxis::T1,
-    vaxis::T2;
-    atol::T1=eps(T1),
-    rtol::T1=sqrt(eps(T1)),
+    x_cache::Vector{T},
+    y_cache::Vector{T},
+    values::Matrix{<:Real},
+    x_coords::AbstractVector{<:Real},
+    y_coords::AbstractVector{<:Real},
+    level::Real,
+    xaxis::Real,
+    yaxis::Real,
+    vaxis::Real;
+    atol::Real=eps(Float64),
+    rtol::Real=sqrt(atol),
     dynamic_resize::Bool=true
-) where {T1<:Real,T2<:Real}
+) where {T<:Real}
 
-    x_cache .= NaN
-    y_cache .= NaN
+    fill!(x_cache, NaN)
+    fill!(y_cache, NaN)
     nx, ny = size(values)
+    @assert length(x_coords) == nx
+    @assert length(y_coords) == ny
 
     direction = level < vaxis ? :decreasing : :increasing
 
@@ -348,7 +350,7 @@ function contour_from_midplane!(
     # the first two points we're already recorded last time
     if status == 1
         i, j = next_backward(istart, jstart, first_edges)
-        last_forward = SVector{2,T2}(x_cache[nforward], y_cache[nforward])
+        last_forward = SVector{2,T}(x_cache[nforward], y_cache[nforward])
     end
     nbackward = 0
     last_point = first_point
