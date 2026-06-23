@@ -43,6 +43,74 @@ function trapz(x::AbstractVector{S}, f::T) where {S<:Real,T<:Function}
 end
 
 """
+    trapz(x::AbstractVector{S}, y::AbstractVector{<:AbstractVector{T}}) where {S<:Real, T<:Real}
+
+Numerically integrates a vector of vectors `y` with respect to `x` using the trapezoidal rule,
+treating each element of `y` as a snapshot at the corresponding `x` value.
+Returns a vector of the same length as `y[1]`.
+"""
+function trapz(x::AbstractVector{S}, y::AbstractVector{<:AbstractVector{T}}) where {S<:Real,T<:Real}
+    N = length(x)
+    @assert N >= 2
+    @assert length(y) == N
+    RT = promote_type(S, T)
+    result = zeros(RT, length(y[1]))
+    @inbounds begin
+        result .+= (x[2] - x[1]) .* y[1]
+        for k in eachindex(x)[2:end-1]
+            result .+= y[k] .* (x[k+1] - x[k-1])
+        end
+        result .+= (x[end] - x[end-1]) .* y[end]
+    end
+    return 0.5 .* result
+end
+
+"""
+    trapz(x::AbstractVector{S}, y::AbstractMatrix{T}, dims::Int) where {S<:Real, T<:Real}
+
+Numerically integrates a 2D array `y` along dimension `dims` with respect to `x` using the trapezoidal rule.
+Returns a vector of integrals over the remaining dimension.
+"""
+function trapz(x::AbstractVector{S}, y::AbstractMatrix{T}, dims::Int) where {S<:Real,T<:Real}
+    if dims == 1
+        @assert length(x) == size(y, 1)
+        return [trapz(x, view(y, :, j)) for j in axes(y, 2)]
+    elseif dims == 2
+        @assert length(x) == size(y, 2)
+        return [trapz(x, view(y, i, :)) for i in axes(y, 1)]
+    else
+        throw(ArgumentError("dims must be 1 or 2 for a 2D array"))
+    end
+end
+
+"""
+    cumtrapz(x::AbstractVector{S}, y::AbstractMatrix{T}, dims::Int) where {S<:Real, T<:Real}
+
+Computes the cumulative integral of a 2D array `y` along dimension `dims` with respect to `x` using the trapezoidal rule.
+Returns a matrix of the same size as `y`.
+"""
+function cumtrapz(x::AbstractVector{S}, y::AbstractMatrix{T}, dims::Int) where {S<:Real,T<:Real}
+    RT = promote_type(S, T)
+    if dims == 1
+        @assert length(x) == size(y, 1)
+        result = Matrix{RT}(undef, size(y))
+        for j in axes(y, 2)
+            cumtrapz!(view(result, :, j), x, view(y, :, j))
+        end
+        return result
+    elseif dims == 2
+        @assert length(x) == size(y, 2)
+        result = Matrix{RT}(undef, size(y))
+        for i in axes(y, 1)
+            cumtrapz!(view(result, i, :), x, view(y, i, :))
+        end
+        return result
+    else
+        throw(ArgumentError("dims must be 1 or 2 for a 2D array"))
+    end
+end
+
+"""
     cumtrapz(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real, T<:Real}
 
 Computes the cumulative integral of the values in `y` with respect to `x` using the trapezoidal rule.
